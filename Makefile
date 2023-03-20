@@ -74,13 +74,18 @@ install-tools: $(MISSPELL)
 
 .PHONY: build-and-push-dockerhub
 build-and-push-dockerhub:
-	docker compose --env-file .dockerhub.env -f docker-compose.yml build
+	docker compose --env-file .dockerhub.env -f docker-compose.yml build --no-cache
 	docker compose --env-file .dockerhub.env -f docker-compose.yml push
 
 .PHONY: build-and-push-ghcr
 build-and-push-ghcr:
-	docker compose --env-file .ghcr.env -f docker-compose.yml build
+	docker compose --env-file .ghcr.env -f docker-compose.yml build --no-cache
 	docker compose --env-file .ghcr.env -f docker-compose.yml push
+	
+.PHONY: build-and-push-ecr
+build-and-push-ecr:
+	docker compose --env-file .ecr.env -f docker-compose.yml build --no-cache
+	docker compose --env-file .ecr.env -f docker-compose.yml push
 
 .PHONY: build-env-file
 build-env-file:
@@ -90,6 +95,9 @@ build-env-file:
 	cp .env .ghcr.env
 	sed -i '/IMAGE_VERSION=.*/c\IMAGE_VERSION=${RELEASE_VERSION}' .ghcr.env
 	sed -i '/IMAGE_NAME=.*/c\IMAGE_NAME=${GHCR_REPO}' .ghcr.env
+	cp .env .ecr.env
+	sed -i '/IMAGE_VERSION=.*/c\IMAGE_VERSION=${RELEASE_VERSION}' .ghcr.env
+	sed -i '/IMAGE_NAME=.*/c\IMAGE_NAME=${ECR_REPO}' .ghcr.env
 
 run-tests:
 	docker compose run frontendTests
